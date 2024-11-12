@@ -1,123 +1,107 @@
-package com.cow;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+/**
+ * Date: 11/11/24
+ * Author: Sophie Knox
+ * Class: CRCP3
+ * Description: This class handles the main game panel.
+ * It sets up the game screen, manages game loop, updates the player character, 
+ * and draws the player's current state on the screen.
+ */
 
-import javax.swing.JPanel;
+ package com.cow;
 
-public class GamePanel extends JPanel implements Runnable
-{
-    //SCREEN SETTINGS
-    final int originalTilesSize = 16; //standard size for 2d pixel games... might do 32
-    final int scale = 3;
-    final int tileSize =  originalTilesSize * scale; //48x48 tile
-    final int maxScreenCol = 20;
-    final int maxScreenRow = 16;
-    final int screenWidth = tileSize * maxScreenCol; //768 pixels
-    final int screenHeight = tileSize * maxScreenRow;//526 pixels
-    int FPS = 60;
-
-
-    KeyHandler keyH = new KeyHandler ();
-    //start and stop...keeps program running
-    Thread gameThread;
-
-    //set player's defult position
-    int playerX = 100;
-    int playerY = 100;
-    int playerSpeed = 4;
-
-
-    //constructor
-    public GamePanel()
-    {
-        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
-        this.setBackground(Color.black);
-        this.setDoubleBuffered(true);
-        this.addKeyListener(keyH);
-        this.setFocusable(true);
-    }
-
-
-    public void startGameThread()
-    {
-        gameThread = new Thread(this); //passing gamepanel through thread
-        gameThread.start();
-    }
-    @Override
-    public void run() 
-    {
-
-        double drawInterval = 1000000000/FPS; //convert
-        double nextDrawTime = System.nanoTime() + drawInterval;
-        //game loop (as long as gameThread is running, it repeats this process)
-        while (gameThread !=null)
-        {
-            long currentTime = System.nanoTime(); //very small unit
-    
-
-            //1) updates information like character permission
-            update();
-            //2)draw screen with updated info
-            repaint();
-
-           
-
-            try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime = remainingTime/1000000;
-
-                if(remainingTime < 0)
-                {
-                    remainingTime = 0;
-                }
-
-                Thread.sleep((long) remainingTime);
-
-                nextDrawTime += drawInterval;
-
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void update()
-    {
-
-        if(keyH.upPressed == true)
-        {
-            playerY = playerY - playerSpeed;
-        }
-        else if(keyH.downPressed == true)
-        {
-            playerY = playerY + playerSpeed;
-        }
-        else if(keyH.leftPressed == true)
-        {
-            playerX = playerX - playerSpeed;
-
-        }
-        else if(keyH.rightPressed == true)
-        {
-            playerX = playerX + playerSpeed;
-
-        }
-    }
-
-    public void paintComponent(Graphics g)
-    {
-        super.paintComponent(g);
-
-        Graphics2D g2 = (Graphics2D)g;
-
-        g2.setColor(Color.white);
-        g2.fillRect(playerX, playerY, tileSize, tileSize);
-        g2.dispose();
-    }
-
-    
-
-}
+ import java.awt.Color;
+ import java.awt.Dimension;
+ import java.awt.Graphics;
+ import java.awt.Graphics2D;
+ import javax.swing.JPanel;
+ 
+ public class GamePanel extends JPanel implements Runnable 
+ {
+ 
+     //SCREEN SETTINGS
+     final int originalTileSize = 32; //standard size for 2D pixel games... 16 and 64 are also standard. This one is best for some detail but not too much.
+     final int scale = 3; //scales tileSize
+     public int tileSize = originalTileSize * scale; //48x48 tile size
+     final int maxScreenCol = 16; //maximum number of columns
+     final int maxScreenRow = 12; //maximum number of rows
+     final int screenWidth = tileSize * maxScreenCol; //screen width in pixels
+     final int screenHeight = tileSize * maxScreenRow; //screen height in pixels
+     int FPS = 60; //frames per second
+ 
+     //game components
+     KeyHandler keyH = new KeyHandler(); //handles player's imput
+     Thread gameThread; //game loop thread
+     PlayerCow playerCow = new PlayerCow(this, keyH); //player character (Cow)
+ 
+     //constructor for the game panel
+     public GamePanel() 
+     {
+         this.setPreferredSize(new Dimension(screenWidth, screenHeight)); //set panel size
+         this.setBackground(Color.white); //set background color to white (will change when creating map)
+         this.setDoubleBuffered(true); //enable double buffering for smooth rendering
+         this.addKeyListener(keyH); //add key listener for input handling
+         this.setFocusable(true); //allow the panel to receive key events
+     }
+ 
+    //start the game loop thread
+    //Game loop: The continuous cycle of updating and renderingea the game state
+    //Game loop thread: runs the game loop independently and ensures smooth game performance
+     public void startGameThread() 
+     {
+         gameThread = new Thread(this); //create a new game loop thread
+         gameThread.start(); //start the game loop
+     }
+ 
+     //game loop
+     @Override
+     public void run() 
+     {
+         double drawInterval = 1000000000 / FPS; //time interval between frames (in nanoseconds... more percise than milliseconds)
+         double nextDrawTime = System.nanoTime() + drawInterval; //sets the next frame time
+ 
+         //game loop: keeps running as long as gameThread is active
+         while (gameThread != null) 
+         {
+             update(); //update game state
+             repaint(); //repaint the screen to reflect changes
+ 
+             try 
+             {
+                 double remainingTime = nextDrawTime - System.nanoTime(); //time remaining until next frame
+                 remainingTime = remainingTime / 1000000; //convert to milliseconds
+ 
+                 if (remainingTime < 0) 
+                 {
+                     remainingTime = 0; //prevent negative time
+                 }
+ 
+                 //sleep to control frame rate
+                 Thread.sleep((long) remainingTime);
+                 nextDrawTime += drawInterval; //set next frame time
+             } 
+             catch (InterruptedException e) 
+             {
+                 e.printStackTrace(); //handle exceptions
+             }
+         }
+     }
+ 
+     //updates player movements
+     public void update() 
+     {
+         playerCow.update(); //update the player's position
+     }
+ 
+     //draws game screen
+     public void paintComponent(Graphics g) 
+     {
+         super.paintComponent(g); //call the superclass's paintComponent method
+         Graphics2D g2 = (Graphics2D) g; //cast Graphics to Graphics2D for advanced drawing
+ 
+         //draw the player character
+         playerCow.draw(g2);
+ 
+         g2.dispose(); //clean up the Graphics2D object
+     }
+ }
+ 

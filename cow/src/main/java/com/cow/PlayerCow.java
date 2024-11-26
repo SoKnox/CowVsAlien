@@ -24,6 +24,7 @@ public class PlayerCow extends Being
     private int animationCounter = 0; //counter for cycling images
     private NPC npc; //Reference to the NPC for collision detection
     private boolean showDialogue = false; //Flag to show the dialogue text
+    private Item heldItem = null;
 
     //constructor to initialize the player cow's position, speed, and images
     public PlayerCow(GamePanel gp, KeyHandler keyH, NPC npc) 
@@ -148,68 +149,72 @@ public class PlayerCow extends Being
                nextY + cowHeight > chickenY;
     }
 
-    //draws the cow's current image on the screen
-    public void draw(Graphics2D g2) 
-    {
-        BufferedImage image = null; //holds the current image
+// Draws the cow's current image on the screen
+public void draw(Graphics2D g2) {
+    BufferedImage image = null; // Holds the current image
 
-        //calculate the position in the animation cycle (0 or 1) based on animation counter
-        int cyclePosition = (animationCounter / 10) % 2; // nly two frames for each direction animation
+    // Calculate the position in the animation cycle (0 or 1) based on animation counter
+    int cyclePosition = (animationCounter / 10) % 2; // Only two frames for each direction animation
 
-        //determine the image based on the direction and whether the player is moving
-        switch (direction) 
-        {
-            case "up":
-                //cycle CowUp1, CowUp2 when moving. CowUp when not moving
-                if (animationCounter == 0) 
-                {
-                    image = up; //no movement, use CowUp
-                } else 
-                {
-                    image = (cyclePosition == 0) ? up1 : up2; //alternating between CowUp1 and CowUp2
-                }
-                break;
-            case "down":
-                //cycle: CowDown1, CowDown2 when moving. CowDown when not moving
-                if (animationCounter == 0) 
-                {
-                    image = down; 
-                    //no movement, use CowDown
-                } else 
-                {
-                    image = (cyclePosition == 0) ? down1 : down2; //alternating between CowDown1 and CowDown2
-                }
-                break;
-            case "left":
-                //Cycle: CowLeft2, CowLeft1 when moving. CowLeft when not moving... Cow Left2 is first this time unlike the other movements.
-                if (animationCounter == 0)
-                {
-                    image = left; //no movement, use CowLeft
-                } else 
-                {
-                    image = (cyclePosition == 0) ? left2 : left1; //alternating between CowLeft2 and CowLeft1
-                }
-                break;
-            case "right":
-                //cycle: CowRight1, CowRight2 when moving. CowRight when not moving
-                if (animationCounter == 0) 
-                {
-                    image = right; //no movement, use CowRight
-                } else 
-                {
-                    image = (cyclePosition == 0) ? right1 : right2; //alternating between CowRight1 and CowRight2
-                }
-                break;
-        }
-
-        //draw the selected image on the screen at the player's position
-        if (image != null) 
-        {
-            g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
-        }
-
-       
+    // Determine the image based on the direction and whether the player is moving
+    switch (direction) {
+        case "up":
+            // Cycle CowUp1, CowUp2 when moving. CowUp when not moving
+            if (animationCounter == 0) {
+                image = up; // No movement, use CowUp
+            } else {
+                image = (cyclePosition == 0) ? up1 : up2; // Alternating between CowUp1 and CowUp2
+            }
+            break;
+        case "down":
+            // Cycle: CowDown1, CowDown2 when moving. CowDown when not moving
+            if (animationCounter == 0) {
+                image = down; // No movement, use CowDown
+            } else {
+                image = (cyclePosition == 0) ? down1 : down2; // Alternating between CowDown1 and CowDown2
+            }
+            break;
+        case "left":
+            // Cycle: CowLeft2, CowLeft1 when moving. CowLeft when not moving
+            if (animationCounter == 0) {
+                image = left; // No movement, use CowLeft
+            } else {
+                image = (cyclePosition == 0) ? left2 : left1; // Alternating between CowLeft2 and CowLeft1
+            }
+            break;
+        case "right":
+            // Cycle: CowRight1, CowRight2 when moving. CowRight when not moving
+            if (animationCounter == 0) {
+                image = right; // No movement, use CowRight
+            } else {
+                image = (cyclePosition == 0) ? right1 : right2; // Alternating between CowRight1 and CowRight2
+            }
+            break;
     }
+
+    // Draw the sword if the cow is holding it
+    if (heldItem != null && heldItem.getName().equals("Sword")) {
+        int swordX = x + gp.tileSize - gp.tileSize / 4; // Adjust to the right of the cow
+        int swordY = y + gp.tileSize / 2 - gp.tileSize / 4; // Adjust to the cow's middle
+        g2.drawImage(heldItem.getImage(), swordX, swordY, gp.tileSize / 2, gp.tileSize / 2, null);
+    }
+
+    // Draw the selected cow image on the screen at the player's position
+    if (image != null) {
+        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+    }
+}
+
+
+    // Getter for the held item (optional, if needed elsewhere)
+public Item getHeldItem() {
+    return heldItem;
+}
+
+// Setter for the held item (optional, if needed elsewhere)
+public void setHeldItem(Item heldItem) {
+    this.heldItem = heldItem;
+}
    
     }
 

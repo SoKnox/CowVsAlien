@@ -6,16 +6,18 @@ import javax.imageio.ImageIO;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class AlienMob extends Mob {
+public class AlienMob extends Mob 
+{
     private int damage;
     private BufferedImage[] alienImages;
     private int currentImageIndex;
     private boolean forwardCycle;
     private LinkedList<BufferedImage> lootItems;
     private int animationTimer;
-    private int animationInterval = 10; // Adjust this value to control the speed of the animation
+    private int animationInterval = 10; 
 
-    public AlienMob(int x, int y, int speed, int health, int damage, String[] imagePaths) {
+    public AlienMob(int x, int y, int speed, int health, int damage, String[] imagePaths) 
+    {
         super(x, y, speed, health);
         this.damage = damage;
         this.lootItems = new LinkedList<>();
@@ -27,81 +29,125 @@ public class AlienMob extends Mob {
         loadLootItems();
     }
 
-    private void loadImages(String[] imagePaths) {
-        for (int i = 0; i < imagePaths.length; i++) {
-            try {
+    private void loadImages(String[] imagePaths)
+     
+    {
+        for (int i = 0; i < imagePaths.length; i++) 
+        {
+            try 
+            {
                 alienImages[i] = ImageIO.read(getClass().getResourceAsStream(imagePaths[i]));
-            } catch (IOException e) {
+            } catch (IOException e) 
+            {
                 e.printStackTrace();
                 System.err.println("Failed to load image: " + imagePaths[i]);
             }
         }
     }
 
-    private void loadLootItems() {
-        try {
+    private void loadLootItems() 
+    {
+        try 
+        {
             lootItems.add(ImageIO.read(getClass().getResourceAsStream("/Items/Sword.png")));
             lootItems.add(ImageIO.read(getClass().getResourceAsStream("/Items/Key.png")));
-        } catch (IOException e) {
+        } catch (IOException e) 
+        {
             e.printStackTrace();
         }
     }
 
-    public BufferedImage dropLoot() {
-        if (!lootItems.isEmpty()) {
-            Random rand = new Random();
-            int index = rand.nextInt(lootItems.size());
-            return lootItems.remove(index);
+    public Item dropLoot(String firstDroppedItem) {
+        if (isAlive() && !lootItems.isEmpty()) {
+            // Determine the item to drop based on the first dropped item
+            BufferedImage lootImage = null;
+            String itemName = null;
+    
+            if (firstDroppedItem == null) {
+                // Drop a random item if no item has been dropped yet
+                Random rand = new Random();
+                int index = rand.nextInt(lootItems.size());
+                lootImage = lootItems.remove(index);
+                itemName = (index == 0) ? "Sword" : "Key"; // Assuming lootItems[0] is Sword, lootItems[1] is Key
+            } else {
+                // Ensure the remaining item is dropped
+                if (firstDroppedItem.equals("Sword")) {
+                    lootImage = lootItems.remove(1); // Key
+                    itemName = "Key";
+                } else {
+                    lootImage = lootItems.remove(0); // Sword
+                    itemName = "Sword";
+                }
+            }
+    
+            return new Item(itemName, lootImage, this.x, this.y);
         }
         return null;
     }
+    
+    
+    
+    
 
     @Override
-    public void move() {
-        // Implement movement logic if needed
+    public void move() 
+    {
+        
     }
 
     @Override
-    public void attack() {
-        // Implement attack logic if needed
+    public void attack() 
+    {
+        
     }
 
-    public int getDamage() {
+    public int getDamage() 
+    {
         return damage;
     }
 
-    public BufferedImage getCurrentImage() {
-        if (currentImageIndex < 0 || currentImageIndex >= alienImages.length) {
+    public BufferedImage getCurrentImage() 
+    {
+        if (currentImageIndex < 0 || currentImageIndex >= alienImages.length) 
+        {
             System.err.println("Index out of bounds: " + currentImageIndex);
-            return null; // Return null or a default image if index is out of bounds
+            return null; 
         }
         return alienImages[currentImageIndex];
     }
 
-    public void updateAnimation() {
+    public void updateAnimation() 
+    {
         animationTimer++;
-        if (animationTimer >= animationInterval) {
+        if (animationTimer >= animationInterval) 
+        {
             animationTimer = 0;
-            if (forwardCycle) {
+            if (forwardCycle) 
+            {
                 currentImageIndex++;
-                if (currentImageIndex >= alienImages.length) {
+                if (currentImageIndex >= alienImages.length) 
+                {
                     forwardCycle = false;
-                    currentImageIndex = alienImages.length - 2; // Start reversing from the second last image
+                    currentImageIndex = alienImages.length - 2; //reversing from the second last image
                 }
-            } else {
+            } else 
+            {
                 currentImageIndex--;
-                if (currentImageIndex < 0) {
+                if (currentImageIndex < 0) 
+                {
                     forwardCycle = true;
-                    currentImageIndex = 1; // Start forward from the second image
+                    currentImageIndex = 1; //forward from the second image
                 }
             }
         }
     }
 
     @Override
-    public void setHealth(int health) {
+    public void setHealth(int health) 
+    {
         super.setHealth(health);
-        if (health <= 0) {
+        if (health <= 0) 
+        {
             setAlive(false);
         }
     }

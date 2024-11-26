@@ -73,48 +73,55 @@ public class WorldMap
         }
     }
 
-    public void draw(Graphics2D g2) {
-        for (int row = 0; row < gp.maxScreenRow; row++) {
-            for (int col = 0; col < gp.maxScreenCol; col++) {
-                int tileType = tiles[col][row].type; // get the type of the tile
-                BufferedImage image = null; // initialize the image
+    public void draw(Graphics2D g2) 
+    {
+        for (int row = 0; row < gp.maxScreenRow; row++) 
+        {
+            for (int col = 0; col < gp.maxScreenCol; col++) 
+            {
+                int tileType = tiles[col][row].type; //get the type of the tile
+                BufferedImage image = null; //initialize the image
 
-                switch (tileType) {
+                switch (tileType) 
+                {
                     case 0:
-                        image = tile0; // set the image for tile type 0
+                        image = tile0; //set the image for tile type 0
                         break;
                     case 1:
-                        image = tile01; // set the image for tile type 1
+                        image = tile01; //set the image for tile type 1
                         break;
                     case 2:
-                        image = tile02; // set the image for tile type 2
+                        image = tile02; //set the image for tile type 2
                         break;
                     case 3:
-                        image = tileGround; // set the image for tile type 3
+                        image = tileGround; //set the image for tile type 3
                         break;
                     case 4:
-                        image = tile11; // set the image for tile type 4
+                        image = tile11; //set the image for tile type 4
                         break;
                     case 5:
-                        image = tile12; // set the image for tile type 5
+                        image = tile12; //set the image for tile type 5
                         break;
                     default:
                         break;
                 }
 
-                if (image != null) {
-                    // draw the image on the screen
+                if (image != null) 
+                {
+                    //draw the image on the screen
                     g2.drawImage(image, col * tileSize, row * tileSize, tileSize, tileSize, null);
                 }
             }
         }
     }
 
-    class Tile {
-        int type; // type of the tile
+    class Tile 
+    {
+        int type; //type of the tile
 
-        public Tile(int type) {
-            this.type = type; // initialize the tile type
+        public Tile(int type) 
+        {
+            this.type = type; //initialize the tile type
         }
     }
 }

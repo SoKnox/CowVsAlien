@@ -12,53 +12,66 @@
  import java.awt.event.KeyEvent;
  import java.awt.event.KeyListener;
  
- public class KeyHandler implements KeyListener {
+ public class KeyHandler implements KeyListener 
+ {
  
-     // Movement flags for each direction
+     //movement flags for each direction
      public boolean upPressed, downPressed, leftPressed, rightPressed;
-     public boolean spacePressed; // Flag for space bar press
+     public boolean spacePressed; //flag for space bar press
  
-     // Handles key press events
+     //handles key press events
      @Override
-     public void keyPressed(KeyEvent e) {
-         int code = e.getKeyCode(); // Gets the key code for the pressed key
+     public void keyPressed(KeyEvent e) 
+     {
+         int code = e.getKeyCode(); //gets the key code for the pressed key
  
-         if (code == KeyEvent.VK_W) {
+         if (code == KeyEvent.VK_W) 
+         {
              upPressed = true;
          }
-         if (code == KeyEvent.VK_S) {
+         if (code == KeyEvent.VK_S) 
+         {
              downPressed = true;
          }
-         if (code == KeyEvent.VK_A) {
+         if (code == KeyEvent.VK_A) 
+         {
              leftPressed = true;
          }
-         if (code == KeyEvent.VK_D) {
+         if (code == KeyEvent.VK_D) 
+         {
              rightPressed = true;
          }
-         if (code == KeyEvent.VK_SPACE) {
+         if (code == KeyEvent.VK_SPACE) 
+         {
              spacePressed = true;
          }
      }
  
-     // Handles key release events
+     //handles key release events
      @Override
-     public void keyReleased(KeyEvent e) {
-         int code = e.getKeyCode(); // Gets the key code for the released key
+     public void keyReleased(KeyEvent e) 
+     {
+         int code = e.getKeyCode(); //gets the key code for the released key
  
-         // Resets the movement flag based on the key released
-         if (code == KeyEvent.VK_W) {
+         //resets the movement flag based on the key released
+         if (code == KeyEvent.VK_W) 
+         {
              upPressed = false;
          }
-         if (code == KeyEvent.VK_S) {
+         if (code == KeyEvent.VK_S) 
+         {
              downPressed = false;
          }
-         if (code == KeyEvent.VK_A) {
+         if (code == KeyEvent.VK_A) 
+         {
              leftPressed = false;
          }
-         if (code == KeyEvent.VK_D) {
+         if (code == KeyEvent.VK_D) 
+         {
              rightPressed = false;
          }
-         if (code == KeyEvent.VK_SPACE) {
+         if (code == KeyEvent.VK_SPACE) 
+         {
              spacePressed = false;
          }
      }

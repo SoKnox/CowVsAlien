@@ -3,24 +3,23 @@ package com.cow;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import java.util.LinkedList;
 import java.util.Random;
 
 public class AlienMob extends Mob 
 {
+
     private int damage;
     private BufferedImage[] alienImages;
     private int currentImageIndex;
     private boolean forwardCycle;
-    private LinkedList<BufferedImage> lootItems;
+    private Item lootItems; //head of the linked list of loot items
     private int animationTimer;
-    private int animationInterval = 10; 
+    private int animationInterval = 10;
 
     public AlienMob(int x, int y, int speed, int health, int damage, String[] imagePaths) 
     {
         super(x, y, speed, health);
         this.damage = damage;
-        this.lootItems = new LinkedList<>();
         this.alienImages = new BufferedImage[imagePaths.length];
         this.currentImageIndex = 0;
         this.forwardCycle = true;
@@ -29,13 +28,11 @@ public class AlienMob extends Mob
         loadLootItems();
     }
 
-    private void loadImages(String[] imagePaths)
-     
+    private void loadImages(String[] imagePaths) 
     {
         for (int i = 0; i < imagePaths.length; i++) 
         {
-            try 
-            {
+            try {
                 alienImages[i] = ImageIO.read(getClass().getResourceAsStream(imagePaths[i]));
             } catch (IOException e) 
             {
@@ -49,61 +46,57 @@ public class AlienMob extends Mob
     {
         try 
         {
-            lootItems.add(ImageIO.read(getClass().getResourceAsStream("/Items/Sword.png")));
-            lootItems.add(ImageIO.read(getClass().getResourceAsStream("/Items/Key.png")));
+            Item swordItem = new Item("Sword", this.x, this.y, ImageIO.read(getClass().getResourceAsStream("/Items/Sword.png")));
+            Item keyItem = new Item("Key", this.x, this.y, ImageIO.read(getClass().getResourceAsStream("/Items/Key.png")));
+            swordItem.setNextItem(keyItem); //link the items
+            this.lootItems = swordItem; //set the head of the list
         } catch (IOException e) 
         {
             e.printStackTrace();
         }
     }
 
-    public Item dropLoot(String firstDroppedItem) {
-        if (isAlive() && !lootItems.isEmpty()) {
-            // Determine the item to drop based on the first dropped item
-            BufferedImage lootImage = null;
+    public Item dropLoot(String firstDroppedItem) 
+    {
+        if (isAlive() && lootItems != null) {
+            //determine the item to drop based on the first dropped item
+            Item lootImage = null;
             String itemName = null;
-    
-            if (firstDroppedItem == null) {
-                // Drop a random item if no item has been dropped yet
+
+            if (firstDroppedItem == null) 
+            {
+                //drop a random item if no item has been dropped yet
                 Random rand = new Random();
-                int index = rand.nextInt(lootItems.size());
-                lootImage = lootItems.remove(index);
-                itemName = (index == 0) ? "Sword" : "Key"; // Assuming lootItems[0] is Sword, lootItems[1] is Key
-            } else {
-                // Ensure the remaining item is dropped
-                if (firstDroppedItem.equals("Sword")) {
-                    lootImage = lootItems.remove(1); // Key
+                int index = rand.nextInt(2); //2 items on list (for now)
+                lootImage = (index == 0) ? lootItems : lootItems.getNextItem();
+                itemName = (index == 0) ? "Sword" : "Key";
+                //remove the dropped item from the list
+                if (index == 0) 
+                {
+                    lootItems = lootItems.getNextItem();
+                } else 
+                {
+                    lootItems.setNextItem(null);
+                }
+            } else 
+            {
+                //ensure the remaining item is dropped
+                if (firstDroppedItem.equals("Sword")) 
+                {
+                    lootImage = lootItems.getNextItem(); //key
                     itemName = "Key";
-                } else {
-                    lootImage = lootItems.remove(0); // Sword
+                    lootItems = null; //remove the last item
+                } else 
+                {
+                    lootImage = lootItems; //sword
                     itemName = "Sword";
+                    lootItems = lootItems.getNextItem(); //remove the first item
                 }
             }
-    
-            return new Item(itemName, lootImage, this.x, this.y);
+
+            return new Item(itemName, this.x, this.y, lootImage.getImage());
         }
         return null;
-    }
-    
-    
-    
-    
-
-    @Override
-    public void move() 
-    {
-        
-    }
-
-    @Override
-    public void attack() 
-    {
-        
-    }
-
-    public int getDamage() 
-    {
-        return damage;
     }
 
     public BufferedImage getCurrentImage() 
@@ -111,7 +104,7 @@ public class AlienMob extends Mob
         if (currentImageIndex < 0 || currentImageIndex >= alienImages.length) 
         {
             System.err.println("Index out of bounds: " + currentImageIndex);
-            return null; 
+            return null;
         }
         return alienImages[currentImageIndex];
     }
@@ -146,10 +139,21 @@ public class AlienMob extends Mob
     public void setHealth(int health) 
     {
         super.setHealth(health);
-        if (health <= 0) 
-        {
+        if (health <= 0) {
             setAlive(false);
         }
+    }
+
+    @Override
+    public void move() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'move'");
+    }
+
+    @Override
+    public void attack() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'attack'");
     }
 }
 

@@ -13,13 +13,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.LinkedList;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable 
 {
 
-    //SCREEN SETTINGS
+    // SCREEN SETTINGS
     final int originalTileSize = 32; //standard size for 2D pixel games... 16 and 64 are also standard. This one is best for some detail but not too much.
     final int scale = 3; //scales tileSize
     public int tileSize = originalTileSize * scale; //48x48 tile size
@@ -29,8 +28,7 @@ public class GamePanel extends JPanel implements Runnable
     final int screenHeight = tileSize * maxScreenRow; //screen height in pixels
     int FPS = 60; //frames per second
 
-
-    //game components
+    // Game components
     KeyHandler keyH = new KeyHandler(); //handles player's input
     Thread gameThread; //game loop thread
     PlayerCow playerCow; //player character (Cow)
@@ -38,15 +36,13 @@ public class GamePanel extends JPanel implements Runnable
     NPC npc; //NPC character
     private AlienMob alien1;
     private AlienMob alien2;
-   
-    private LinkedList<Integer> itemX = new LinkedList<>();
-    private LinkedList<Integer> itemY = new LinkedList<>();
-    private LinkedList<Item> droppedItems = new LinkedList<>();
-    private String firstDroppedItem = null; // Tracks the first item dropped ("Sword" or "Key")
+
+    private Item droppedItems; //head of the linked list of dropped items
+    private String firstDroppedItem = null; //tracks the first item dropped ("Sword" or "Key")
 
     //constructor for the game panel
     public GamePanel() {
-        this.setPreferredSize(new Dimension(screenWidth, screenHeight)); //set panel size
+        this.setPreferredSize(new Dimension(screenWidth, screenHeight)); // Set panel size
         this.setBackground(Color.white); //set background color to white (will change when creating map)
         this.setDoubleBuffered(true); //enable double buffering for smooth rendering
         this.addKeyListener(keyH); //add key listener for input handling
@@ -62,15 +58,15 @@ public class GamePanel extends JPanel implements Runnable
         playerCow = new PlayerCow(this, keyH, npc);
 
         //initialize AlienMob instances
-        String[] alien1Images = {"/Alien1/Alien1.png", "/Alien1/Alien1.png","/Alien1/Alien11.png", "/Alien1/Alien12.png", "/Alien1/Alien13.png", "/Alien1/Alien14.png"};
-        String[] alien2Images = {"/Alien2/Alien2.png", "/Alien2/Alien2.png","/Alien2/Alien21.png", "/Alien2/Alien22.png", "/Alien2/Alien23.png"};
+        String[] alien1Images = {"/Alien1/Alien1.png", "/Alien1/Alien1.png", "/Alien1/Alien11.png", "/Alien1/Alien12.png", "/Alien1/Alien13.png", "/Alien1/Alien14.png"};
+        String[] alien2Images = {"/Alien2/Alien2.png", "/Alien2/Alien2.png", "/Alien2/Alien21.png", "/Alien2/Alien22.png", "/Alien2/Alien23.png"};
         alien1 = new AlienMob(screenWidth / 3, 100, 2, 100, 10, alien1Images);
         alien2 = new AlienMob(2 * screenWidth / 3, 200, 2, 100, 10, alien2Images);
     }
 
     //start the game loop thread
     //Game loop: The continuous cycle of updating and rendering the game state
-    //Game loop thread: runs the game loop independently and ensures smooth game performance
+    //Game loop thread: Runs the game loop independently and ensures smooth game performance
     public void startGameThread() 
     {
         gameThread = new Thread(this); //create a new game loop thread
@@ -81,10 +77,10 @@ public class GamePanel extends JPanel implements Runnable
     @Override
     public void run() 
     {
-        double drawInterval = 1000000000 / FPS; //time interval between frames (in nanoseconds... more precise than milliseconds)
+        double drawInterval = 1000000000.0 / FPS; //time interval between frames (in nanoseconds... more precise than milliseconds)
         double nextDrawTime = System.nanoTime() + drawInterval; //sets the next frame time
 
-        //game loop: keeps running as long as gameThread is active
+        //game loop: Keeps running as long as gameThread is active
         while (gameThread != null) 
         {
             update(); //update game state
@@ -111,72 +107,107 @@ public class GamePanel extends JPanel implements Runnable
     }
 
     //updates player movements
-    public void update() {
-        playerCow.update(); // Update the player's position
-    
+    public void update() 
+    {
+        playerCow.update(); //update the player's position
+
         alien1.updateAnimation();
         alien2.updateAnimation();
-    
-        // Check if space bar is pressed for attacking aliens
-        if (keyH.spacePressed) {
+
+        //check if space bar is pressed for attacking aliens
+        if (keyH.spacePressed) 
+        {
             checkProximityAndKillAliens();
-            keyH.spacePressed = false; // Reset the space bar flag
+            keyH.spacePressed = false; //reset the space bar flag
         }
-    
-        // Check collision with dropped items
+
+        //check collision with dropped items
         checkItemPickup();
     }
-    
-    private void checkItemPickup() {
-        for (int i = 0; i < droppedItems.size(); i++) {
-            Item item = droppedItems.get(i);
-    
-            // Check collision: Cow's bounding box overlaps item's position
+
+    private void checkItemPickup() 
+    {
+        Item current = droppedItems; //start from the head of the list
+
+        //go through the list until the end (nextItem == null)
+        while (current != null) 
+        {
+            //check collision: Cow's bounding box overlaps item's position
             int cowCenterX = playerCow.x + tileSize / 2;
             int cowCenterY = playerCow.y + tileSize / 2;
-    
-            if (Math.abs(cowCenterX - item.getX()) < tileSize / 2 &&
-                Math.abs(cowCenterY - item.getY()) < tileSize / 2) {
-    
-                if (item.getName().equals("Sword")) {
-                    playerCow.setHeldItem(item); // Attach the sword to the cow
-                    droppedItems.remove(i); // Remove the item from the dropped list
+
+            if (Math.abs(cowCenterX - current.getX()) < tileSize / 2 &&
+                Math.abs(cowCenterY - current.getY()) < tileSize / 2) 
+                {
+
+                if (current.getName().equals("Sword")) 
+                {
+                    playerCow.setHeldItem(current); //attach the sword to the cow
+                    droppedItems = current.getNextItem(); //remove the item from the dropped list
                     break;
                 }
             }
+
+            current = current.getNextItem(); //move to the next item in the list
         }
     }
-    
 
     //check proximity to aliens and kill them if within range
-    private void checkProximityAndKillAliens() {
-        if (alien1.isAlive() && isWithinProximity(playerCow, alien1)) {
-            Item loot = alien1.dropLoot(firstDroppedItem); // Pass the dropped item to restrict options
-            if (loot != null) {
-                droppedItems.add(loot);
-                if (firstDroppedItem == null) {
-                    firstDroppedItem = loot.getName(); // Record the first dropped item
+    private void checkProximityAndKillAliens() 
+    {
+        if (alien1.isAlive() && isWithinProximity(playerCow, alien1)) 
+        {
+            Item loot = alien1.dropLoot(firstDroppedItem); //pass the dropped item to restrict options
+            if (loot != null) 
+            {
+                if (droppedItems == null) 
+                {
+                    droppedItems = loot; //set the head of the list
+                } else 
+                {
+                    Item current = droppedItems;
+                    while (current.getNextItem() != null) 
+                    {
+                        current = current.getNextItem(); //move to the last item in the list
+                    }
+                    current.setNextItem(loot); //add the new item to the end of the list
+                }
+                if (firstDroppedItem == null) 
+                {
+                    firstDroppedItem = loot.getName(); //record the first dropped item
                 }
             }
             alien1.setHealth(0);
             alien1.setAlive(false);
         }
-    
-        if (alien2.isAlive() && isWithinProximity(playerCow, alien2)) {
-            Item loot = alien2.dropLoot(firstDroppedItem); // Pass the dropped item to restrict options
-            if (loot != null) {
-                droppedItems.add(loot);
-                if (firstDroppedItem == null) {
-                    firstDroppedItem = loot.getName(); // Record the first dropped item
+
+        if (alien2.isAlive() && isWithinProximity(playerCow, alien2)) 
+        {
+            Item loot = alien2.dropLoot(firstDroppedItem); //pass the dropped item to restrict options
+            if (loot != null) 
+            {
+                if (droppedItems == null) 
+                {
+                    droppedItems = loot; //set the head of the list
+                } else 
+                {
+                    Item current = droppedItems;
+                    while (current.getNextItem() != null)
+                    {
+                        current = current.getNextItem(); //move to the last item in the list
+                    }
+                    current.setNextItem(loot); //add the new item to the end of the list
+                }
+                if (firstDroppedItem == null) 
+                {
+                    firstDroppedItem = loot.getName(); //record the first dropped item
                 }
             }
             alien2.setHealth(0);
             alien2.setAlive(false);
         }
     }
-    
-    
-    
+
     //check if the player is within 150 pixels of the alien
     private boolean isWithinProximity(PlayerCow player, AlienMob alien) 
     {
@@ -218,15 +249,20 @@ public class GamePanel extends JPanel implements Runnable
         }
 
         //draw dropped items
-        for (Item item : droppedItems) {
-            if (item.getImage() != null) {
-                g2.drawImage(item.getImage(), item.getX(), item.getY(), tileSize, tileSize, null);
+        Item current = droppedItems; //start from the head of the list
+        while (current != null) 
+        {
+            if (current.getImage() != null) 
+            {
+                g2.drawImage(current.getImage(), current.getX(), current.getY(), tileSize, tileSize, null);
             }
+            current = current.getNextItem(); //move to the next item in the list
         }
 
         g2.dispose(); //clean up the Graphics2D object
     }
 }
+
 
 
 

@@ -1,3 +1,11 @@
+/**
+ * Date: 11/24/24
+ * Author: Sophie Knox
+ * Class: CRCP3
+ * Description: This class represents an alien mob in the game, which includes its position, health, damage,
+ * animation images, and a linked list of loot items. 
+ */
+
 package com.cow;
 
 import java.awt.image.BufferedImage;

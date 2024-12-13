@@ -1,5 +1,13 @@
+/**
+ * Date: 12/13/24
+ * Author: Sophie Knox
+ * Class: CRCP3
+ * Description: This class represents a boss mob in the game, which includes its position, health, damage,
+ * animation images, and a loot item that the boss drops.
+ */
 package com.cow;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -8,29 +16,36 @@ public class Boss extends Mob
 {
 
     private int damage;
-    private BufferedImage bossImage;
+    private BufferedImage[] bossImages;
+    private int currentImageIndex;
     private Item spaceshipLoot; //spaceship item that the boss drops
     private Item bossDropped; //holds the dropped spaceship
     private int animationTimer;
     private int animationInterval = 10;
+    private boolean reversing = false; //flag to indicate if the cycle is reversing
 
     public Boss(int x, int y, int speed, int health, int damage) 
     {
-        super(x, y, speed, health);
+        super(x, y, speed, health, 100, 100); 
         this.damage = damage;
-        loadBossImage();
+        loadBossImages();
         loadLootItem();
+        currentImageIndex = 0; //start with the first image
     }
 
-    private void loadBossImage() 
+    //loads Boss images
+    private void loadBossImages() 
     {
+        bossImages = new BufferedImage[3];
         try 
         {
-            bossImage = ImageIO.read(getClass().getResourceAsStream("/Boss/Boss.png"));
+            bossImages[0] = ImageIO.read(getClass().getResourceAsStream("/Boss/Boss1.png"));
+            bossImages[1] = ImageIO.read(getClass().getResourceAsStream("/Boss/Boss2.png"));
+            bossImages[2] = ImageIO.read(getClass().getResourceAsStream("/Boss/Boss3.png"));
         } catch (IOException e) 
         {
             e.printStackTrace();
-            System.err.println("Failed to load boss image.");
+            System.err.println("Failed to load boss images.");
         }
     }
 
@@ -52,15 +67,23 @@ public class Boss extends Mob
         if (!isAlive() && spaceshipLoot != null) 
         {
             bossDropped = new Item(spaceshipLoot.getName(), this.x, this.y, spaceshipLoot.getImage());
-            spaceshipLoot = null; //clear the loot 
+            spaceshipLoot = null; //clear the loot after it’s been dropped
             return bossDropped;
         }
-        return null; 
+        return null; //no loot to drop if boss is not dead or loot is already dropped
     }
 
+    //scales/resizes boss image
     public BufferedImage getBossImage() 
     {
-        return bossImage;
+        BufferedImage originalImage = bossImages[currentImageIndex];
+        int scaledWidth = originalImage.getWidth() * 2;
+        int scaledHeight = originalImage.getHeight() * 2;
+        BufferedImage scaledImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = scaledImage.createGraphics();
+        g2.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
+        g2.dispose();
+        return scaledImage;
     }
 
     public Item getBossDropped() 
@@ -68,7 +91,7 @@ public class Boss extends Mob
         return bossDropped;
     }
 
-    public Item getSpaceshipLoot()
+    public Item getSpaceshipLoot() 
     {
         return spaceshipLoot;
     }
@@ -80,6 +103,23 @@ public class Boss extends Mob
         {
             animationTimer = 0;
             //update the animation cycle
+            if (!reversing) {
+                if (currentImageIndex < 2) 
+                {
+                    currentImageIndex++; //Boss1 -> Boss2 -> Boss3
+                } else 
+                {
+                    reversing = true; //start reversing
+                }
+            } else {
+                if (currentImageIndex > 0) 
+                {
+                    currentImageIndex--; //Boss3 -> Boss2 -> Boss1
+                } else 
+                {
+                    reversing = false; // start moving forward again
+                }
+            }
         }
     }
 
@@ -93,18 +133,16 @@ public class Boss extends Mob
     }
 
     @Override
-    public void move() {
-        // Define the boss's movement behavior
-        // For example, the boss could move randomly or follow a specific pattern
+    public void move() 
+    {
+        //not needed
     }
 
     @Override
-    public void attack() {
-        // Define the boss's attack behavior
-        // For example, the boss could attack the player or other entities
+    public void attack() 
+    {
+        //not needed
     }
 }
-
-
 
 

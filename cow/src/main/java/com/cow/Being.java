@@ -1,5 +1,5 @@
 /**
- * Date: 11/14/24
+ * Date: 12/13/24
  * Author: Sophie Knox
  * Class: CRCP3
  * Description: This public class acts as the framework for game entities, handling position, speed,

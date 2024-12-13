@@ -1,11 +1,10 @@
 /**
- * Date: 11/24/24
+ * Date: 12/13/24
  * Author: Sophie Knox
  * Class: CRCP3
  * Description: This class represents an alien mob in the game, which includes its position, health, damage,
  * animation images, and a linked list of loot items. 
  */
-
 package com.cow;
 
 import java.awt.image.BufferedImage;
@@ -15,7 +14,6 @@ import java.util.Random;
 
 public class AlienMob extends Mob 
 {
-
     private int damage;
     private BufferedImage[] alienImages;
     private int currentImageIndex;
@@ -23,24 +21,29 @@ public class AlienMob extends Mob
     private Item lootItems; //head of the linked list of loot items
     private int animationTimer;
     private int animationInterval = 10;
+    private boolean isHit; //state to indicate if the alien is hit
 
-    public AlienMob(int x, int y, int speed, int health, int damage, String[] imagePaths) 
+    public AlienMob(int x, int y, int speed, int health, int damage, String[] imagePaths, int width, int height) 
     {
-        super(x, y, speed, health);
+        super(x, y, speed, health, width, height);
         this.damage = damage;
         this.alienImages = new BufferedImage[imagePaths.length];
         this.currentImageIndex = 0;
         this.forwardCycle = true;
         this.animationTimer = 0;
+        this.isHit = false; //initialize the hit state to false
         loadImages(imagePaths);
         loadLootItems();
+        setCurrentImage(alienImages[currentImageIndex]);
     }
 
+    //load alien images
     private void loadImages(String[] imagePaths) 
     {
         for (int i = 0; i < imagePaths.length; i++) 
         {
-            try {
+            try 
+            {
                 alienImages[i] = ImageIO.read(getClass().getResourceAsStream(imagePaths[i]));
             } catch (IOException e) 
             {
@@ -50,11 +53,12 @@ public class AlienMob extends Mob
         }
     }
 
+    //loads loot items
     private void loadLootItems() 
     {
         try 
         {
-            Item swordItem = new Item("Sword", this.x, this.y, ImageIO.read(getClass().getResourceAsStream("/Items/Sword.png")));
+            Item swordItem = new Item("Sword", this.x, this.y, ImageIO.read(getClass().getResourceAsStream("/Items/S1.png")));
             Item keyItem = new Item("Key", this.x, this.y, ImageIO.read(getClass().getResourceAsStream("/Items/Key.png")));
             swordItem.setNextItem(keyItem); //link the items
             this.lootItems = swordItem; //set the head of the list
@@ -66,57 +70,50 @@ public class AlienMob extends Mob
 
     public Item dropLoot(String firstDroppedItem) 
     {
-        if (isAlive() && lootItems != null) {
-            //determine the item to drop based on the first dropped item
+        if (isAlive() && lootItems != null) 
+        {
             Item lootImage = null;
             String itemName = null;
 
             if (firstDroppedItem == null) 
             {
-                //drop a random item if no item has been dropped yet
+                //random item drop
                 Random rand = new Random();
-                int index = rand.nextInt(2); //2 items on list (for now)
+                int index = rand.nextInt(2); //two items in the list
                 lootImage = (index == 0) ? lootItems : lootItems.getNextItem();
                 itemName = (index == 0) ? "Sword" : "Key";
+
                 //remove the dropped item from the list
                 if (index == 0) 
                 {
                     lootItems = lootItems.getNextItem();
                 } else 
                 {
-                    lootItems.setNextItem(null);
+                    lootItems.setNextItem(null); //only one item left
                 }
             } else 
             {
-                //ensure the remaining item is dropped
+                //drop the remaining item if one item was already dropped
                 if (firstDroppedItem.equals("Sword")) 
                 {
-                    lootImage = lootItems.getNextItem(); //key
+                    lootImage = lootItems.getNextItem(); //drop Key
                     itemName = "Key";
-                    lootItems = null; //remove the last item
+                    lootItems = null; //no items left
                 } else 
                 {
-                    lootImage = lootItems; //sword
+                    lootImage = lootItems; //drop Sword
                     itemName = "Sword";
-                    lootItems = lootItems.getNextItem(); //remove the first item
+                    lootItems = lootItems.getNextItem(); //remove Sword
                 }
             }
 
+            //return the dropped loot item
             return new Item(itemName, this.x, this.y, lootImage.getImage());
         }
-        return null;
+        return null; //no loot to drop
     }
 
-    public BufferedImage getCurrentImage() 
-    {
-        if (currentImageIndex < 0 || currentImageIndex >= alienImages.length) 
-        {
-            System.err.println("Index out of bounds: " + currentImageIndex);
-            return null;
-        }
-        return alienImages[currentImageIndex];
-    }
-
+    //alien animation by changing alien image
     public void updateAnimation() 
     {
         animationTimer++;
@@ -140,6 +137,7 @@ public class AlienMob extends Mob
                     currentImageIndex = 1; //forward from the second image
                 }
             }
+            setCurrentImage(alienImages[currentImageIndex]);
         }
     }
 
@@ -147,22 +145,31 @@ public class AlienMob extends Mob
     public void setHealth(int health) 
     {
         super.setHealth(health);
-        if (health <= 0) {
+        if (health <= 0) 
+        {
             setAlive(false);
         }
     }
 
     @Override
-    public void move() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'move'");
+    public void move() 
+    {
+        
     }
 
     @Override
-    public void attack() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'attack'");
+    public void attack()
+    {
+        
+    }
+
+    public void setHit(boolean hit) 
+    {
+        isHit = hit;
+    }
+
+    public boolean isHit() 
+    {
+        return isHit;
     }
 }
-
-

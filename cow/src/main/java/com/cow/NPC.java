@@ -1,8 +1,8 @@
 /**
- * Date: 11/14/24
+ * Date: 12/13/24
  * Author: Sophie Knox
  * Class: CRCP3
- * Description: Represents a non-player character (the chicken) in the game. Handles NPC interactions and dialogue display.
+ * Description: Represents a non-player character (the duck) in the game. Handles NPC interactions and dialogue display.
  */
 package com.cow;
 
